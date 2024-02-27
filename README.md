@@ -16,6 +16,7 @@
 
 - Adafruit GFX Library - https://github.com/adafruit/Adafruit-GFX-Library
 - Adafruit SH110x - https://github.com/adafruit/Adafruit_SH110x (Depends on your OLED display controller)
+- DDC-CI VPC by Toni Tanner (Github: https://github.com/tttttx2/ddcvcp)
 
 ## Circuit diagram
 

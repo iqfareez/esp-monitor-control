@@ -1,7 +1,11 @@
+#include "DDCVCP.h"
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
+
+DDCVCP ddc;
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -71,7 +75,7 @@ void setup()
 
     // show loading animation
     int frame = 0;
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 15; i++)
     {
         display.clearDisplay();
         display.drawBitmap(40, 8, frames[frame], FRAME_WIDTH, FRAME_HEIGHT, 1);
@@ -81,6 +85,26 @@ void setup()
     }
 
     display.clearDisplay();
+
+    // Display status
+    display.setTextSize(1);
+    display.setTextColor(SH110X_WHITE);
+    display.setCursor(1, 1);
+    display.println("Initializing DDC");
+    display.display();
+
+    while (!ddc.begin())
+    {
+        Serial.print(F("-  Unable to find DDC/CI. Trying again in 5 seconds.\n"));
+        display.clearDisplay();
+        display.println("Failed to find DDC/CI. Retrying in 5 seconds.");
+        display.display();
+        delay(5000);
+    }
+    Serial.print(F("-  Found DDC/CI successfully.\n"));
+    display.clearDisplay();
+    display.println("Found DDC/CI successfully.");
+    display.display();
 
     // Init pinmodes
     pinMode(menuButtonPin, INPUT_PULLUP);
@@ -95,7 +119,7 @@ void setup()
     display.print("0x");
     display.println(0xDEADBEEF, HEX);
     display.display();
-    delay(1000);
+    delay(500);
     display.clearDisplay();
 }
 
@@ -121,12 +145,16 @@ void drawCentreString(const char *buf, int x, int y, int size)
 
 void loop()
 {
+    display.clearDisplay();
     if (currentMenu == MODE_BRIGHTNESS)
     {
         display.setCursor(0, 0);
         display.setTextColor(SH110X_WHITE);
         // display.setTextSize(5);
-        drawCentreString("78", 69, 12, 5);
+        int currentBrightness = ddc.getBrightness();
+        char buffer[5];
+        sprintf(buffer, "%d", currentBrightness);
+        drawCentreString(buffer, 69, 12, 5);
         // display.println(F("Brightness"));
         drawCentreString("Brightness", 64, 50, 1);
 
